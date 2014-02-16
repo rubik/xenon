@@ -7,6 +7,7 @@ python:
 install:
     - pip install -e . --use-mirrors
     - pip install -r test_requirements.txt --use-mirrors
+    - pip install -r tox_requirements.txt --use-mirrors
 script:
     - make cov
 after_success:
