@@ -10,5 +10,6 @@ install:
     - pip install -r tox_requirements.txt --use-mirrors
 script:
     - make cov
+    - xenon xenon -bB -aA
 after_success:
     - coveralls
