@@ -7,7 +7,7 @@ except ImportError:
     from io import StringIO
 from paramunittest import parametrized
 
-import xenon
+import xenon.core
 
 
 Block = collections.namedtuple('Block', 'name complexity lineno')
@@ -31,7 +31,7 @@ class AvTestCase(unittest.TestCase):
         self.r = r
 
     def testAv(self):
-        self.assertEqual(xenon.av(self.m, self.n), self.r)
+        self.assertEqual(xenon.core.av(self.m, self.n), self.r)
 
 
 @parametrized(
@@ -50,7 +50,7 @@ class CheckTestCase(unittest.TestCase):
         self.r = r
 
     def testCheck(self):
-        self.assertEqual(xenon.check(self.a, self.b), self.r)
+        self.assertEqual(xenon.core.check(self.a, self.b), self.r)
 
 
 @parametrized(
@@ -113,9 +113,9 @@ class RunTestCase(unittest.TestCase):
             pass
         def _analyze_cc():
             return self.r
-        x = xenon.Xenon(self.args)
+        x = xenon.core.Xenon(self.args)
         x._analyze_cc = _analyze_cc
-        xenon.sys.stdout = StringIO()
+        xenon.core.sys.stdout = StringIO()
         self.assertEqual(x.run(), self.exit_code)
 
 

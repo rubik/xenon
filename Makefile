@@ -4,17 +4,17 @@ tests:
 	python test_xenon.py
 
 cov:
-	coverage erase && coverage run --include "xenon.py" test_xenon.py
+	coverage erase && coverage run --include "xenon" test_xenon.py
 	coverage report -m
 
 htmlcov: cov
 	coverage html
 
 pep8:
-	pep8 xenon.py
+	pep8 xenon
 
 pylint:
-	pylint --rcfile pylintrc xenon.py
+	pylint --rcfile pylintrc xenon
 
 docs:
 	cd docs && make html
