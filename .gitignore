@@ -1,5 +1,6 @@
 *.py[cod]
 *.sw[op]
+htmlcov
 
 # C extensions
 *.so
