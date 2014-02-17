@@ -26,10 +26,6 @@ class Xenon(object):
                                                                  **kwargs)))
 
     def _analyze_cc(self):
-        import radon
-        print radon.__version__
-        import inspect
-        print inspect.getsource(iter_filenames)
         for name in iter_filenames(self.args.path, self.args.exclude,
                                    self.args.ignore):
             with open(name) as fobj:
