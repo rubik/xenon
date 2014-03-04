@@ -1,6 +1,5 @@
 import sys
 import operator
-import argparse
 
 from radon.tools import iter_filenames
 from radon.complexity import cc_visit, cc_rank

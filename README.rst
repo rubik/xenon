@@ -10,6 +10,9 @@ xenon
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/xenon?branch=master
 
+.. image:: https://landscape.io/github/rubik/xenon/master/landscape.png
+   :target: https://landscape.io/github/rubik/xenon/master
+   :alt: Code Health
 
 .. image:: https://pypip.in/v/xenon/badge.png
     :alt: PyPI latest version badge
