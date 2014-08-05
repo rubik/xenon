@@ -13,7 +13,6 @@ xenon
     :alt: PyPI latest version badge
     :target: https://crate.io/packages/xenon
 
-
 .. image:: https://pypip.in/d/xenon/badge.png?style=flat
     :alt: PyPI downloads badge
     :target: https://pypi.python.org/pypi/xenon/

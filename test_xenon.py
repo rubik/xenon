@@ -1,17 +1,39 @@
-#import mock  # can't use mock because patches influences each other
+# coding=utf-8
+# import mock  # can't use mock because patches influences each other
+import os
 import unittest
 import collections
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+
+import httpretty
 from paramunittest import parametrized
 
-import xenon.core
+from xenon import core, api, main
 
 
 Block = collections.namedtuple('Block', 'name complexity lineno')
 Args = collections.namedtuple('Args', 'absolute average modules')
+
+
+class CatchAll(object):
+
+    def __getattr__(self, attr):
+        return lambda *a, **kw: True
+
+
+class Arguments(object):
+    path = 'xenon'
+    url = 'http://api.barium.cc/jobs'
+    repo_token = 'abcdef1234569abdcef'
+    service_job_id = '4699301'
+    service_name = 'travis-ci',
+    config = os.path.join(path, '.xenon.yml')
+    exclude = None
+    ignore = None
+    no_assert = False
+    average = None
+    absolute = None
+    modules = None
+
 
 def genexp(dict):
     for a, b in dict.items():
@@ -31,7 +53,7 @@ class AvTestCase(unittest.TestCase):
         self.r = r
 
     def testAv(self):
-        self.assertEqual(xenon.core.av(self.m, self.n), self.r)
+        self.assertEqual(core.av(self.m, self.n), self.r)
 
 
 @parametrized(
@@ -50,7 +72,7 @@ class CheckTestCase(unittest.TestCase):
         self.r = r
 
     def testCheck(self):
-        self.assertEqual(xenon.core.check(self.a, self.b), self.r)
+        self.assertEqual(core.check(self.a, self.b), self.r)
 
 
 @parametrized(
@@ -103,20 +125,63 @@ class RunTestCase(unittest.TestCase):
     def setParameters(self, results, args, exit_code):
         r = {}
         for k, v in results.items():
-            r[k] = [Block(name='block', complexity=cc, lineno=1) for cc in v]
-        self.r = genexp(r)
+            r[k] = [dict(name='block', complexity=cc, lineno=1) for cc in v]
+        self.r = r
         self.args = Args(*args)
+        self.logger = CatchAll()
         self.exit_code = exit_code
 
     def test_run(self):
-        def _log(*args, **kwargs):
-            pass
-        def _analyze_cc():
-            return self.r
-        x = xenon.core.Xenon(self.args)
-        x._analyze_cc = _analyze_cc
-        xenon.core.sys.stdout = StringIO()
-        self.assertEqual(x.run(), self.exit_code)
+        x = core.Runner(self.args, self.logger)
+        self.assertEqual(x.run(self.r) != 0, self.exit_code)
+
+
+class APITestCase(unittest.TestCase):
+
+    def _exit_code(self):
+        try:
+            main(Arguments)
+        except SystemExit as e:
+            return e.code
+
+    @httpretty.activate
+    def test_main_ok(self):
+        httpretty.register_uri(
+            httpretty.POST,
+            'http://api.barium.cc/jobs',
+            body='{"message":"Job #5.1","url":"http://barium.cc/jobs/5722"}'
+        )
+        self.assertEqual(self._exit_code(), 0)
+
+    @httpretty.activate
+    def test_main_not_ok(self):
+        httpretty.register_uri(
+            httpretty.POST,
+            'http://api.barium.cc/jobs',
+            body='{"message":"Build processing error.","error":true,"url":""}',
+            status=500,
+        )
+        self.assertEqual(self._exit_code(), 3)
+
+    @httpretty.activate
+    def test_api(self):
+        httpretty.register_uri(
+            httpretty.POST,
+            'http://api.barium.cc/jobs',
+            body='{"message":"Resource creation started",' \
+                 '"url":"http://barium.cc/jobs/5722"}'
+        )
+        response = api.post(
+            url=Arguments.url,
+            repo_token=Arguments.repo_token,
+            service_job_id=Arguments.service_job_id,
+            service_name=Arguments.service_name,
+            git={},
+            cc_data={}
+        )
+        self.assertEqual(response.json(),
+                         {u'url': u'http://barium.cc/jobs/5722',
+                          u'message': u'Resource creation started'})
 
 
 if __name__ == '__main__':

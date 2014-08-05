@@ -1,15 +1,19 @@
 __version__ = '0.1'
 
+import os
+import sys
+import logging
 
-def main():
-    import sys
+
+def parse_args():
+    import yaml
     import argparse
-    from xenon.core import Xenon
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--version', action='version',
                         version=__version__)
-    parser.add_argument('path', nargs='+', help='Source files to analyze')
+    parser.add_argument('path', help='Directory containing source files to '
+                        'analyze')
     parser.add_argument('-a', '--max-average', dest='average', metavar='<str>',
                         help='Threshold for the average complexity')
     parser.add_argument('-m', '--max-modules', dest='modules', metavar='<str>',
@@ -21,15 +25,55 @@ def main():
                         help='Comma separated list of patters to exclude')
     parser.add_argument('-i', '--ignore', metavar='<str>', dest='ignore',
                         help='Comma separated list of patters to ignore. If '
-                        'they are directories, xenon won\'t even descend into '
+                        'they are directories, Xenon won\'t even descend into '
                         'them')
+    parser.add_argument('-u', '--url', metavar='<URL>', dest='url',
+                        help='Where to send the JSON data through a POST '
+                        'request.')
     parser.add_argument('--no-assert', metavar='<str>', dest='no_assert',
                         help='Do not count `assert` statements when computing '
                         'complexity')
+    parser.add_argument('-c', '--config-file', metavar='<path>', dest='config',
+                        default='.xenon.yml', help='Xenon config file '
+                        '(default: %(default)s)')
 
-    x = Xenon(parser.parse_args())
-    sys.exit(x.run())
+    args = parser.parse_args()
+    args.config = os.path.join(args.path, args.config)
+    try:
+        with open(args.config, 'r') as f:
+            yml = yaml.load(f)
+    except (FileNotFoundError, yaml.YAMLError):
+        yml = {}
+    args.repo_token = yml.get('repo_token',
+                              os.environ.get('BARIUM_REPO_TOKEN', ''))
+    args.service_name = yml.get('service_name', 'travis-ci')
+    args.service_job_id = os.environ.get('TRAVIS_JOB_ID', '')
+    return args
 
 
-if __name__ == '__main__':
-    main()
+def main(args=None):
+    from xenon.api import post
+    from xenon.core import analyze
+    from xenon.repository import gitrepo
+
+    args = args or parse_args()
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger('xenon')
+    errors, cc_data = analyze(args, logger)
+    exit_code = 0
+    if args.url:
+        response = post(
+            url=args.url,
+            repo_token=args.repo_token,
+            service_job_id=args.service_job_id,
+            service_name=args.service_name,
+            git=gitrepo(args.path),
+            cc_data=cc_data
+        )
+        logger.info('HTTP: %s', response.status_code)
+        logger.info('HTTP: %s', response.text)
+        if 'error' in response.json():
+            exit_code = 3
+    if errors:
+        exit_code = 1
+    sys.exit(exit_code)
