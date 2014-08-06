@@ -45,9 +45,9 @@ class Runner(object):
                 if check(r, self.args.absolute):
                     self.log('block "%s:%s %s" has a rank of %s', module,
                              block['lineno'], block['name'], r)
-            module_averages.append((module, av(module_cc, len(results))))
+            module_averages.append((module, av(module_cc, len(blocks))))
             total_cc += module_cc
-            total_blocks += len(results)
+            total_blocks += len(blocks)
 
         ar = cc_rank(av(total_cc, total_blocks))
         if check(ar, self.args.average):

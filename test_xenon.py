@@ -10,7 +10,6 @@ from paramunittest import parametrized
 from xenon import core, api, main
 
 
-Block = collections.namedtuple('Block', 'name complexity lineno')
 Args = collections.namedtuple('Args', 'absolute average modules')
 
 
@@ -33,11 +32,6 @@ class Arguments(object):
     average = None
     absolute = None
     modules = None
-
-
-def genexp(dict):
-    for a, b in dict.items():
-        yield a, b
 
 
 @parametrized(
@@ -132,8 +126,8 @@ class RunTestCase(unittest.TestCase):
         self.exit_code = exit_code
 
     def test_run(self):
-        x = core.Runner(self.args, self.logger)
-        self.assertEqual(x.run(self.r) != 0, self.exit_code)
+        code = core.Runner(self.args, self.logger).run(self.r)
+        self.assertEqual(code != 0, self.exit_code)
 
 
 class APITestCase(unittest.TestCase):
@@ -168,7 +162,7 @@ class APITestCase(unittest.TestCase):
         httpretty.register_uri(
             httpretty.POST,
             'http://api.barium.cc/jobs',
-            body='{"message":"Resource creation started",' \
+            body='{"message":"Resource creation started",'
                  '"url":"http://barium.cc/jobs/5722"}'
         )
         response = api.post(
@@ -180,8 +174,8 @@ class APITestCase(unittest.TestCase):
             cc_data={}
         )
         self.assertEqual(response.json(),
-                         {u'url': u'http://barium.cc/jobs/5722',
-                          u'message': u'Resource creation started'})
+                         {'url': 'http://barium.cc/jobs/5722',
+                          'message': 'Resource creation started'})
 
 
 if __name__ == '__main__':

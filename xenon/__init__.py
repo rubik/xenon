@@ -42,7 +42,8 @@ def parse_args():
     try:
         with open(args.config, 'r') as f:
             yml = yaml.load(f)
-    except (FileNotFoundError, yaml.YAMLError):
+    except (getattr(__builtins__, 'FileNotFoundError', IOError),
+            yaml.YAMLError):
         yml = {}
     args.repo_token = yml.get('repo_token',
                               os.environ.get('BARIUM_REPO_TOKEN', ''))
