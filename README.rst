@@ -25,4 +25,4 @@ xenon
     :alt: Xenon license
     :target: https://pypi.python.org/pypi/xenon/
 
-Monitoring tool based on [radon](https://github.com/rubik/radon/).
+Monitoring tool based on `radon <https://github.com/rubik/radon/>`_.
