@@ -21,9 +21,6 @@ pylint:
 docs:
 	cd docs && make html
 
-dev-deps:
-	pip install -r dev_requirements.pip
-
 test-deps:
 	pip install -r test_requirements.pip
 
