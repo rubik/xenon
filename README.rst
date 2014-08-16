@@ -55,25 +55,27 @@ Typically you would use Xenon in two scenarios:
    complexity values.
 
 2. On a **continuous integration** server: as a part of your build, to keep
-   under control, as above, your code's complexity. See Xenon's `.travis.yml
-   file `https://github.com/rubik/xenon/blob/master/.travis.yml`_ for an
-   example usage.
+   under control, as above, your code's complexity. See Xenon's
+   `.travis.yml file`_ for an example usage.
 
+The command line
+++++++++++++++++
 
 Everything boils down to Xenon's command line usage.
 To control which files are analyzed, you use the options ``-e, --exclude`` and
-``-i, --ignore``. Both accept a comma-separated list of glob patterns. The value
-usually needs quoting at the command line, to prevent the shell from expanding
-the pattern (in case there is only one). Every filename is matched against the
-*exclude* patterns. Every directory name is matched against *ignore* patterns.
-If any of the patterns matches, Xenon won't even descend into them.
+``-i, --ignore``. Both accept a comma-separated list of glob patterns. The
+value usually needs quoting at the command line, to prevent the shell from
+expanding the pattern (in case there is only one). Every filename is matched
+against the *exclude* patterns. Every directory name is matched against the
+*ignore* patterns.  If any of the patterns matches, Xenon won't even descend
+into them.
 
 The actual threshold values are defined through these options:
 
 * ``-a, --max-average``: Threshold for the *average* complexity (across all the
   codebase).
 * ``-m, --max-modules``: Threshold for *modules* complexity.
-* ``-b, --max-absolute``: **Absolute** threshold for *block* complexity.
+* ``-b, --max-absolute``: *Absolute* threshold for *block* complexity.
 
 
 All of these options are inclusive.
@@ -111,3 +113,6 @@ based on:
   http://radon.readthedocs.org/en/latest/intro.html
 * More on Radon's ranking:
   http://radon.readthedocs.org/en/latest/commandline.html#the-cc-command
+
+
+.. _.travis.yml file: https://github.com/rubik/xenon/blob/master/.travis.yml
