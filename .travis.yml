@@ -13,6 +13,6 @@ install:
     - ./install-26-deps.sh
 script:
     - make cov
-    - xenon xenon -bB -aA
+    - xenon xenon -bB -mA -aA
 after_success:
     - coveralls

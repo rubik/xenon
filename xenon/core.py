@@ -1,6 +1,6 @@
 from radon.complexity import cc_rank, SCORE
-from radon.cli import analyze_cc
-from radon.tools import cc_to_dict
+from radon.cli import Config
+from radon.cli.harvest import CCHarvester
 
 
 def av(n, m):
@@ -14,10 +14,14 @@ def check(rank, default=None):
 
 
 def analyze(args, logger):
-    results = {}
-    for key, data in analyze_cc([args.path], args.exclude, args.ignore, SCORE,
-                                args.no_assert):
-        results[key] = list(map(cc_to_dict, data))
+    config = Config(
+        exclude=args.exclude,
+        ignore=args.ignore,
+        order=SCORE,
+        no_assert=args.no_assert,
+    )
+    h = CCHarvester([args.path], config)
+    results = h._to_dicts()
     runner = Runner(args, logger)
     return runner.run(results), results
 
