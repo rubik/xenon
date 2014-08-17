@@ -25,6 +25,9 @@ xenon
     :alt: Xenon license
     :target: https://pypi.python.org/pypi/xenon/
 
+
+----
+
 Xenon is a monitoring tool based on `Radon <https://github.com/rubik/radon/>`_.
 It monitors your code's complexity.  Ideally, Xenon is run every time you
 commit code. Through command line options, you can set various thresholds for
