@@ -50,6 +50,7 @@ def find_infractions(args, logger, results):
     The number of infractions with respect to the threshold values is returned.
     '''
     def log(msg, *args):
+        '''Format the message, log it and add it to the infractions.'''
         fmsg = msg % args
         infractions.append(fmsg)
         logger.error(fmsg)
