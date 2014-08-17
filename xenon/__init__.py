@@ -2,7 +2,7 @@
 The latter is the entry point for the command line program.
 '''
 
-__version__ = '0.2.1'
+__version__ = '0.3'
 
 import os
 import sys
