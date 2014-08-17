@@ -1,0 +1,17 @@
+0.3 (Aug 17, 2014)
+------------------
+
+* Add basic documentation: #3.
+* Use HTTPretty in tests.
+* Make Xenon stabler.
+
+0.2.1 (Aug 16, 2014)
+--------------------
+
+* Add ``-u, --url`` option: #2.
+* Add tests.
+
+0.1 (Never)
+-----------
+
+There was no 0.1
