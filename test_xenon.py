@@ -126,7 +126,7 @@ class RunTestCase(unittest.TestCase):
         self.exit_code = exit_code
 
     def test_run(self):
-        code = core.Runner(self.args, self.logger).run(self.r)
+        code = core.find_infractions(self.args, self.logger, self.r)
         self.assertEqual(code != 0, self.exit_code)
 
 

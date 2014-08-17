@@ -1,3 +1,7 @@
+'''Module containing the two topmost-level functions: parse_args() and main().
+The latter is the entry point for the command line program.
+'''
+
 __version__ = '0.2.1'
 
 import os
@@ -6,6 +10,9 @@ import logging
 
 
 def parse_args():
+    '''Parse arguments from the command line and read the config file (for the
+    REPO_TOKEN value).
+    '''
     import yaml
     import argparse
 
@@ -38,6 +45,12 @@ def parse_args():
                         '(default: %(default)s)')
 
     args = parser.parse_args()
+    # normalize the rank
+    for attr in ('absolute', 'modules', 'average'):
+        val = getattr(args, attr, None)
+        if val is None:
+            continue
+        setattr(args, attr, val.upper())
     args.config = os.path.join(args.path, args.config)
     try:
         with open(args.config, 'r') as f:
@@ -53,6 +66,9 @@ def parse_args():
 
 
 def main(args=None):
+    '''Entry point for the command line program. ``sys.exit`` is called at the
+    end.
+    '''
     from xenon.api import post
     from xenon.core import analyze
     from xenon.repository import gitrepo
