@@ -49,13 +49,7 @@ def find_infractions(args, logger, results):
 
     The number of infractions with respect to the threshold values is returned.
     '''
-    def log(msg, *args):
-        '''Format the message, log it and add it to the infractions.'''
-        fmsg = msg % args
-        infractions.append(fmsg)
-        logger.error(fmsg)
-
-    infractions = []
+    infractions = 0
     module_averages = []
     total_cc = 0.
     total_blocks = 0
@@ -65,17 +59,20 @@ def find_infractions(args, logger, results):
             module_cc += block['complexity']
             r = cc_rank(block['complexity'])
             if check(r, args.absolute):
-                log('block "%s:%s %s" has a rank of %s', module,
-                    block['lineno'], block['name'], r)
+                logger.error('block "%s:%s %s" has a rank of %s', module,
+                             block['lineno'], block['name'], r)
+                infractions += 1
         module_averages.append((module, av(module_cc, len(blocks))))
         total_cc += module_cc
         total_blocks += len(blocks)
 
     ar = cc_rank(av(total_cc, total_blocks))
     if check(ar, args.average):
-        log('average complexity is ranked %s', ar)
+        logger.error('average complexity is ranked %s', ar)
+        infractions += 1
     for module, ma in module_averages:
         mar = cc_rank(ma)
         if check(mar, args.modules):
-            log('module %r has a rank of %s', module, mar)
-    return len(infractions)
+            logger.error('module %r has a rank of %s', module, mar)
+            infractions += 1
+    return infractions
