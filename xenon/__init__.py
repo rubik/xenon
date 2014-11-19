@@ -29,9 +29,9 @@ def parse_args():
                         metavar='<str>', help='Absolute threshold for block '
                         'complexity')
     parser.add_argument('-e', '--exclude', metavar='<str>', dest='exclude',
-                        help='Comma separated list of patters to exclude')
+                        help='Comma separated list of patterns to exclude')
     parser.add_argument('-i', '--ignore', metavar='<str>', dest='ignore',
-                        help='Comma separated list of patters to ignore. If '
+                        help='Comma separated list of patterns to ignore. If '
                         'they are directories, Xenon won\'t even descend into '
                         'them')
     parser.add_argument('-u', '--url', metavar='<URL>', dest='url',
