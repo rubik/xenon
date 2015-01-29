@@ -37,7 +37,7 @@ def parse_args():
     parser.add_argument('-u', '--url', metavar='<URL>', dest='url',
                         help='Where to send the JSON data through a POST '
                         'request.')
-    parser.add_argument('--no-assert', metavar='<str>', dest='no_assert',
+    parser.add_argument('--no-assert', dest='no_assert', action='store_true',
                         help='Do not count `assert` statements when computing '
                         'complexity')
     parser.add_argument('-c', '--config-file', metavar='<path>', dest='config',
