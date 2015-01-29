@@ -18,7 +18,7 @@ setup(name='xenon',
       long_description=readme,
       packages=['xenon'],
       tests_require=['tox'],
-      install_requires=['radon==1.0', 'requests', 'sh', 'PyYAML'],
+      install_requires=['radon', 'requests', 'sh', 'PyYAML'],
       entry_points={'console_scripts': ['xenon = xenon:main']},
       classifiers=[
           'Development Status :: 4 - Beta',
