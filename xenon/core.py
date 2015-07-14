@@ -25,6 +25,9 @@ def analyze(args, logger):
         ignore=args.ignore,
         order=SCORE,
         no_assert=args.no_assert,
+        show_closures=False,
+        min='A',
+        max='F',
     )
     h = CCHarvester([args.path], config)
     results = h._to_dicts()
@@ -55,6 +58,9 @@ def find_infractions(args, logger, results):
     total_blocks = 0
     for module, blocks in results.items():
         module_cc = 0.
+        if isinstance(blocks, dict) and blocks.get('error'):
+            logger.warning('cannot parse %s: %s', module, blocks['error'])
+            continue
         for block in blocks:
             module_cc += block['complexity']
             r = cc_rank(block['complexity'])
