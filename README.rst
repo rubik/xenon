@@ -1,11 +1,11 @@
 xenon
 =====
 
-.. image:: http://img.shields.io/travis/rubik/xenon/master.svg
+.. image:: https://img.shields.io/travis/rubik/xenon/master.svg
     :alt: Travis-CI badge
     :target: https://travis-ci.org/rubik/xenon
 
-.. image:: http://img.shields.io/coveralls/rubik/xenon/master.svg
+.. image:: https://img.shields.io/coveralls/rubik/xenon/master.svg
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/xenon?branch=master
 
@@ -18,8 +18,8 @@ xenon
     :target: https://pypi.python.org/pypi/xenon/
 
 .. image:: https://img.shields.io/pypi/format/xenon.svg
-    :target: https://pypi.python.org/pypi/xenon/
     :alt: Download format
+    :target: http://pythonwheels.com/
 
 .. image:: https://img.shields.io/pypi/l/xenon.svg
     :alt: Xenon license
