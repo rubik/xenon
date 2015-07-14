@@ -1,27 +1,27 @@
 xenon
 =====
 
-.. image:: http://img.shields.io/travis/rubik/xenon/master.svg?style=flat
+.. image:: http://img.shields.io/travis/rubik/xenon/master.svg
     :alt: Travis-CI badge
     :target: https://travis-ci.org/rubik/xenon
 
-.. image:: http://img.shields.io/coveralls/rubik/xenon/master.svg?style=flat
+.. image:: http://img.shields.io/coveralls/rubik/xenon/master.svg
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/xenon?branch=master
 
-.. image:: https://pypip.in/v/xenon/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/v/xenon.svg
     :alt: PyPI latest version badge
-    :target: https://crate.io/packages/xenon
+    :target: https://pypi.python.org/pypi/xenon/
 
-.. image:: https://pypip.in/d/xenon/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/dm/xenon.svg
     :alt: PyPI downloads badge
     :target: https://pypi.python.org/pypi/xenon/
 
-.. image:: https://pypip.in/format/xenon/badge.svg?style=flat
+.. image:: https://img.shields.io/pypi/format/xenon.svg
     :target: https://pypi.python.org/pypi/xenon/
     :alt: Download format
 
-.. image:: https://pypip.in/license/xenon/badge.png?style=flat
+.. image:: https://img.shields.io/pypi/l/xenon.svg
     :alt: Xenon license
     :target: https://pypi.python.org/pypi/xenon/
 
