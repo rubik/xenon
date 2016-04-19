@@ -1,24 +1,33 @@
 '''This module is used to gather all the Git-related data.'''
 
 import os
-import sh
+import subprocess
 
 FORMAT = '%n'.join(['%H', '%aN', '%ae', '%at', '%cN', '%ce', '%ct', '%s'])
 
 
+def git(*args):
+    p = subprocess.Popen(['git'] + list(args), stdout=subprocess.PIPE)
+    out, _ = p.communicate()
+    ret = p.poll()
+    if ret:
+        raise subprocess.CalledProcessError(ret, 'git', output=out)
+    return out.decode('utf-8')
+
+
 def gitrepo(root):
     '''Construct a dictionary holding all the Git data that can be found.'''
-    oldpwd = sh.pwd().strip()
-    sh.cd(root)
-    gitlog = sh.git('--no-pager', 'log', '-1',
-                    pretty="format:%s" % FORMAT).split('\n', 7)
+    oldwd = os.getcwd()
+    os.chdir(root)
+    gitlog = git('--no-pager', 'log', '-1',
+                 '--pretty="format:%s"' % FORMAT).split('\n', 7)
     branch = (os.environ.get('CIRCLE_BRANCH') or
               os.environ.get('TRAVIS_BRANCH',
-                             sh.git('rev-parse',
-                                    '--abbrev-ref', 'HEAD').strip()))
-    remotes = [x.split() for x in sh.git.remote('-v').strip().splitlines()
+                             git('rev-parse',
+                                 '--abbrev-ref', 'HEAD').strip()))
+    remotes = [x.split() for x in git('remote', '-v').strip().splitlines()
                if x.endswith('(fetch)')]
-    sh.cd(oldpwd)
+    os.chdir(oldwd)
     return {
         "head": {
             "id": gitlog[0],
