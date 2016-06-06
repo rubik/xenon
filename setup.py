@@ -6,6 +6,9 @@ import xenon
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fobj:
     readme = fobj.read()
 
+with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as fobj:
+    reqs = fobj.read().splitlines()
+
 setup(name='xenon',
       version=xenon.__version__,
       author='Michele Lacchia',
@@ -18,8 +21,7 @@ setup(name='xenon',
       long_description=readme,
       packages=['xenon'],
       tests_require=['tox', 'httpretty'],
-      install_requires=['radon==1.2.2', 'requests==2.7.0',
-                        'PyYAML==3.11'],
+      install_requires=reqs,
       entry_points={'console_scripts': ['xenon = xenon:main']},
       classifiers=[
           'Development Status :: 4 - Beta',
