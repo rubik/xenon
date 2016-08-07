@@ -7,9 +7,9 @@ python:
     - "3.5"
     - "pypy"
 install:
-    - pip install -e . --use-mirrors
-    - pip install -r test_requirements.txt --use-mirrors
-    - pip install -r tox_requirements.txt --use-mirrors
+    - pip install -e .
+    - pip install -r test_requirements.txt
+    - pip install -r tox_requirements.txt
     - ./install-26-deps.sh
 script:
     - make cov
