@@ -13,10 +13,6 @@ xenon
     :alt: PyPI latest version badge
     :target: https://pypi.python.org/pypi/xenon/
 
-.. image:: https://img.shields.io/pypi/dm/xenon.svg
-    :alt: PyPI downloads badge
-    :target: https://pypi.python.org/pypi/xenon/
-
 .. image:: https://img.shields.io/pypi/format/xenon.svg
     :alt: Download format
     :target: http://pythonwheels.com/
