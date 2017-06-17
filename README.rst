@@ -45,6 +45,9 @@ Or download the source and run the setup file (requires setuptools):
 
    $ python setup.py install
 
+Xenon is tested with all versions of Python from **2.7** to **3.6** as well as
+**PyPy**.
+
 Usage
 -----
 
