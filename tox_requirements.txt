@@ -1,3 +1,2 @@
-https://github.com/rubik/ParamUnittest/tarball/fix-all
-httpretty
--r requirements.txt
+tox
+-r test_requirements.txt
