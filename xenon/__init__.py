@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument('-v', '--version', action='version',
                         version=__version__)
     parser.add_argument('path', help='Directory containing source files to '
-                        'analyze')
+                        'analyze, or multiple file paths', nargs='+')
     parser.add_argument('-a', '--max-average', dest='average', metavar='<str>',
                         help='Threshold for the average complexity')
     parser.add_argument('-m', '--max-modules', dest='modules', metavar='<str>',
@@ -51,7 +51,6 @@ def parse_args():
         if val is None:
             continue
         setattr(args, attr, val.upper())
-    args.config = os.path.join(args.path, args.config)
     try:
         with open(args.config, 'r') as f:
             yml = yaml.load(f)
@@ -75,6 +74,11 @@ def main(args=None):
 
     args = args or parse_args()
     logging.basicConfig(level=logging.INFO)
+    if len(args.path) > 1:
+        logger.error(
+            '-u, --url cannot be used when multiple paths are specified',
+        )
+        sys.exit(1)
     logger = logging.getLogger('xenon')
     errors, cc_data = analyze(args, logger)
     exit_code = 0

@@ -29,7 +29,7 @@ def analyze(args, logger):
         min='A',
         max='F',
     )
-    h = CCHarvester([args.path], config)
+    h = CCHarvester(args.path, config)
     results = h._to_dicts()
     return find_infractions(args, logger, results), results
 
