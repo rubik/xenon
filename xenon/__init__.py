@@ -75,7 +75,7 @@ def main(args=None):
     args = args or parse_args()
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('xenon')
-    if len(args.path) > 1:
+    if args.url and len(args.path) > 1:
         logger.error(
             '-u, --url cannot be used when multiple paths are specified',
         )
