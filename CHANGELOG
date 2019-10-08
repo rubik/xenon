@@ -1,3 +1,20 @@
+0.7.0 (Oct 08, 2019)
+--------------------
+
+* Allow xenon to be run as a module: #33, thanks @davegallant
+
+0.6.0 (Oct 02, 2019)
+--------------------
+
+* Update pinned dependencies
+* Fix CLI crash in some specific cases: #30, thanks @idmitrievsky
+
+
+0.5.5 (Feb 3, 2019)
+-------------------
+
+* Fix PyYAML dependencies by removing the usafe one
+
 0.5.0 (Aug 07, 2016)
 --------------------
 
