@@ -33,6 +33,9 @@ nosetests.xml
 # Translations
 *.mo
 
+# Editors
+.idea
+
 # Mr Developer
 .mr.developer.cfg
 .project
