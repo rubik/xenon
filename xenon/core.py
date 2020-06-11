@@ -72,7 +72,13 @@ def find_infractions(args, logger, results):
         total_cc += module_cc
         total_blocks += len(blocks)
 
-    ar = cc_rank(av(total_cc, total_blocks))
+    av_cc = av(total_cc, total_blocks)
+    ar = cc_rank(av_cc)
+
+    if args.averagenum is not None and av_cc > args.averagenum:
+        logger.error('total average complexity is %s', av_cc)
+        infractions += 1
+
     if check(ar, args.average):
         logger.error('average complexity is ranked %s', ar)
         infractions += 1
