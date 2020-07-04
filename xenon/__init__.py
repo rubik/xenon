@@ -22,7 +22,9 @@ def parse_args():
     parser.add_argument('path', help='Directory containing source files to '
                         'analyze, or multiple file paths', nargs='+')
     parser.add_argument('-a', '--max-average', dest='average', metavar='<str>',
-                        help='Threshold for the average complexity')
+                        help='Letter grade threshold for the average complexity')
+    parser.add_argument('--max-average-num', dest='averagenum', type=float,
+                        help='Numeric threshold for the average complexity')
     parser.add_argument('-m', '--max-modules', dest='modules', metavar='<str>',
                         help='Threshold for modules complexity')
     parser.add_argument('-b', '--max-absolute', dest='absolute',

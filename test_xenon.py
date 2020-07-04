@@ -10,7 +10,7 @@ from paramunittest import parametrized
 from xenon import core, api, main
 
 
-Args = collections.namedtuple('Args', 'absolute average modules')
+Args = collections.namedtuple('Args', 'absolute average modules averagenum')
 
 
 class CatchAll(object):
@@ -32,6 +32,7 @@ class Arguments(object):
     average = None
     absolute = None
     modules = None
+    averagenum = None
 
 
 @parametrized(
@@ -71,46 +72,46 @@ class CheckTestCase(unittest.TestCase):
 
 @parametrized(
     # results
-    # absolute, average, modules
+    # absolute, average, modules, averagenum
     # exit code
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'B', 'B'),
+        ('C', 'B', 'B', None),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('B', 'B', 'B'),
+        ('B', 'B', 'B', None),
         1
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'A', 'B'),
+        ('C', 'A', 'B', None),
         1
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'B', 'A'),
+        ('C', 'B', 'A', None),
         1
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        (None, 'B', 'B'),
+        (None, 'B', 'B', None),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', None, 'B'),
+        ('C', None, 'B', None),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'B', None),
+        ('C', 'B', None, None),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        (None, None, None),
+        (None, None, None, 0),
         0
     ),
 )
