@@ -1,0 +1,7 @@
+---
+- id: xenon
+  name: Xenon
+  description: Monitoring tool based on Radon
+  entry: xenon
+  language: python
+  types: [text]
