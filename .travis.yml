@@ -10,6 +10,6 @@ install:
     - pip install -r test_requirements.txt
 script:
     - make cov
-    - xenon xenon -bB -mA -aA
+    - xenon xenon -bC -mB -aA
 after_success:
     - coveralls
