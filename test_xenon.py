@@ -20,12 +20,12 @@ class CatchAll(object):
 
 
 class Arguments(object):
-    path = 'xenon'
+    path = ['xenon']
     url = 'http://api.barium.cc/jobs'
     repo_token = 'abcdef1234569abdcef'
     service_job_id = '4699301'
     service_name = 'travis-ci',
-    config = os.path.join(path, '.xenon.yml')
+    config = os.path.join(path[0], '.xenon.yml')
     exclude = None
     ignore = None
     no_assert = False
@@ -73,7 +73,7 @@ class CheckTestCase(unittest.TestCase):
 @parametrized(
     # results
     # absolute, average, modules, averagenum
-    # exit code
+    # infractions
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
         ('C', 'B', 'B', None),
@@ -112,23 +112,23 @@ class CheckTestCase(unittest.TestCase):
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
         (None, None, None, 0),
-        0
+        1
     ),
 )
-class RunTestCase(unittest.TestCase):
+class InfractionsTestCase(unittest.TestCase):
 
-    def setParameters(self, results, args, exit_code):
+    def setParameters(self, results, args, infractions):
         r = {}
         for k, v in results.items():
             r[k] = [dict(name='block', complexity=cc, lineno=1) for cc in v]
         self.r = r
         self.args = Args(*args)
         self.logger = CatchAll()
-        self.exit_code = exit_code
+        self.infractions = infractions
 
     def test_run(self):
-        code = core.find_infractions(self.args, self.logger, self.r)
-        self.assertEqual(code != 0, self.exit_code)
+        infr = core.find_infractions(self.args, self.logger, self.r)
+        self.assertEqual(infr, self.infractions)
 
 
 class APITestCase(unittest.TestCase):

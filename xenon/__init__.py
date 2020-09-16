@@ -90,7 +90,7 @@ def main(args=None):
             repo_token=args.repo_token,
             service_job_id=args.service_job_id,
             service_name=args.service_name,
-            git=gitrepo(args.path),
+            git=gitrepo(args.path[0]),
             cc_data=cc_data
         )
         logger.info('HTTP: %s', response.status_code)

@@ -12,7 +12,7 @@ def analyze(args, logger):
     given *logger*.
     The *args* object should have the following attributes:
 
-        * ``path``: the file to analyze.
+        * ``path``: a list of files to analyze.
         * ``exclude`` and ``ignore``: the patterns specifying which files to
             exclude and which directories to ignore.
         * ``no_assert``: if ``True``, ``assert`` statements will not be counted
