@@ -2,11 +2,14 @@
 # import mock  # can't use mock because patches influences each other
 import os
 import unittest
+import unittest.mock
 import collections
+import tempfile
 
 import httpretty
 from paramunittest import parametrized
 
+import xenon
 from xenon import core, api, main
 
 
@@ -177,6 +180,230 @@ class APITestCase(unittest.TestCase):
         self.assertEqual(response.json(),
                          {'url': 'http://barium.cc/jobs/5722',
                           'message': 'Resource creation started'})
+
+
+class TestCustomConfigParserGetStr(unittest.TestCase):
+    '''Test class for class CustomConfigParser - getstr method.'''
+
+    @staticmethod
+    def get_configuration(text):
+        '''Get CustomConfigParser object with loaded text.'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject_path = tmp_dir + '/pyproject.toml'
+            with open(pyproject_path, "w") as toml_file:
+                toml_file.write(text)
+
+            configuration = xenon.CustomConfigParser()
+            configuration.read(pyproject_path)
+
+        return configuration
+
+    def test_missing_section_case(self):
+        '''Test missing section case.'''
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = ["path_1", "path_2", "path_3"]\n'
+            'max-average = "A"\n'
+            'max-average-num = 1.2\n')
+
+        self.assertEqual(
+            configuration.getstr(xenon.PYPROJECT_SECTION, "maxaverage", "None"), "None")
+
+    def test_with_trim_value_case(self):
+        '''Test with trim value case.'''
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = ["path_1", "path_2", "path_3"]\n'
+            'max-average = "A"\n'
+            'max-modules = \'B\'\n'
+            'max-average-num = 1.2\n')
+
+        self.assertEqual(
+            configuration.getstr(xenon.PYPROJECT_SECTION, "max-average", "None"), "A")
+
+        self.assertEqual(
+            configuration.getstr(xenon.PYPROJECT_SECTION, "max-modules", "None"), "B")
+
+    def test_without_trim_value_case(self):
+        '''Test without trim value case.'''
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = ["path_1", "path_2", "path_3"]\n'
+            'max-average = A\n'
+            'max-average-num = 1.2\n')
+
+        self.assertEqual(
+            configuration.getstr(xenon.PYPROJECT_SECTION, "max-average", "None"), "A")
+
+
+class TestCustomConfigParserGetListStr(unittest.TestCase):
+    '''Test class for class CustomConfigParser - getliststr method.'''
+
+    @staticmethod
+    def get_configuration(text):
+        '''Get CustomConfigParser object with loaded text.'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject_path = tmp_dir + '/pyproject.toml'
+            with open(pyproject_path, "w") as toml_file:
+                toml_file.write(text)
+
+            configuration = xenon.CustomConfigParser()
+            configuration.read(pyproject_path)
+
+        return configuration
+
+    def test_missing_section_case(self):
+        '''Test missing section case.'''
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = ["path_1", "path_2", "path_3"]\n'
+            'max-average = "A"\n'
+            'max-average-num = 1.2\n')
+
+        self.assertEqual(
+            configuration.getliststr(xenon.PYPROJECT_SECTION, "maxaverage", "None"), "None")
+
+    def test_parse_error_case(self):
+        '''Test parse error case.'''
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = ["path_1", "path_2", "path_3"\n'
+            'max-average = "A"\n'
+            'max-average-num = 1.2\n')
+
+        self.assertRaisesRegex(
+            xenon.PyProjectParseError, "path", configuration.getliststr,
+            xenon.PYPROJECT_SECTION, "path")
+
+    def test_single_value_case(self):
+        '''Test single value case.'''
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = "path_1"\n'
+            'max-average = "A"\n'
+            'max-average-num = 1.2\n')
+
+        self.assertListEqual(
+            configuration.getliststr(xenon.PYPROJECT_SECTION, "path", None), ["path_1"])
+
+    def test_invalid_format_case(self):
+        '''Test invalid format case'''
+        # Not a list case
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = {"path_1": "path_2"}\n'
+            'max-average = "A"\n'
+            'max-average-num = 1.2\n')
+
+        self.assertRaisesRegex(
+            xenon.PyProjectParseError, "path", configuration.getliststr,
+            xenon.PYPROJECT_SECTION, "path", None)
+
+        # Not a list of str case
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = ["path_1", "path_2", true]\n'
+            'max-average = "A"\n'
+            'max-average-num = 1.2\n')
+
+        self.assertRaisesRegex(
+            xenon.PyProjectParseError, "path", configuration.getliststr,
+            xenon.PYPROJECT_SECTION, "path", None)
+
+    def test_multiple_values_case(self):
+        '''Test multiple values case.'''
+        configuration = self.get_configuration(
+            '[tool.xenon]\n'
+            'path = ["path_1", "path_2", "path_3"]\n'
+            'max-average = "A"\n'
+            'max-average-num = 1.2\n')
+
+        self.assertListEqual(
+            configuration.getliststr(xenon.PYPROJECT_SECTION, "path", None),
+            ["path_1", "path_2", "path_3"])
+
+
+class TestParsePyproject(unittest.TestCase):
+    '''Test class for function parse_pyproject.'''
+
+    def test_parse_error_case(self):
+        '''Parse error case.'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject_path = tmp_dir + '/pyproject.toml'
+            with open(pyproject_path, "w") as toml_file:
+                toml_file.write('parameter = value')
+
+            self.assertRaisesRegex(
+                xenon.PyProjectParseError, "Unable", xenon.parse_pyproject, pyproject_path)
+
+    def test_duplicate_parameteres_case(self):
+        '''Test duplicate parameters case'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject_path = tmp_dir + '/pyproject.toml'
+            with open(pyproject_path, "w") as toml_file:
+                toml_file.write(
+                    '[tool.xenon]\n'
+                    'max-average-num = value_1\n'
+                    'max-average-num = value_2')
+
+            self.assertRaisesRegex(
+                xenon.PyProjectParseError, "duplicate parameters", xenon.parse_pyproject, pyproject_path)
+
+    def test_missing_file_case(self):
+        '''Test missing file path case.'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self.assertDictEqual(xenon.parse_pyproject(tmp_dir), {})
+
+    def test_invalid_max_average_num_type_case(self):
+        '''Test invalid max-average-num parameter type case'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject_path = tmp_dir + '/pyproject.toml'
+            with open(pyproject_path, "w") as toml_file:
+                toml_file.write('[tool.xenon]\nmax-average-num = value')
+
+            self.assertRaisesRegex(
+                xenon.PyProjectParseError, "max-average-num", xenon.parse_pyproject, pyproject_path)
+
+    def test_invalid_no_assert_type_case(self):
+        '''Test invalid no_assert parameter type case'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject_path = tmp_dir + '/pyproject.toml'
+            with open(pyproject_path, "w") as toml_file:
+                toml_file.write('[tool.xenon]\nno-assert = next')
+
+            self.assertRaisesRegex(
+                xenon.PyProjectParseError, "no-assert", xenon.parse_pyproject, pyproject_path)
+
+    def test_all_parameters_case(self):
+        '''Test all parameters case.'''
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject_path = tmp_dir + '/pyproject.toml'
+            with open(pyproject_path, "w") as toml_file:
+                toml_file.write(
+                    '[tool.xenon]\n'
+                    'path = ["path_1", "path_2", "path_3"]\n'
+                    'max-average = "A"\n'
+                    'max-average-num = 1.2\n'
+                    'max-modules = "B"\n'
+                    'max-absolute = "C"\n'
+                    'exclude = ["path_4", "path_5"]\n'
+                    'ignore = ["path_6", "path_7"]\n'
+                    'no-assert = true')
+
+            result = xenon.parse_pyproject(pyproject_path)
+
+            self.assertDictEqual(
+                xenon.parse_pyproject(pyproject_path), {
+                    "path": ["path_1", "path_2", "path_3"],
+                    "average": 'A',
+                    "averagenum": 1.2,
+                    "modules": 'B',
+                    "absolute": 'C',
+                    "url": None,
+                    "config": None,
+                    "exclude": 'path_4,path_5',
+                    "ignore": 'path_6,path_7',
+                    "no_assert": True})
 
 
 if __name__ == '__main__':
