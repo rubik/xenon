@@ -21,7 +21,7 @@ PYPROJECT_SECTION = "tool.xenon"
 
 class PyProjectParseError(Exception):
     '''Exception for pyproject.toml parser.'''
-    def __init__(self, msg) -> None:
+    def __init__(self, msg):
         super(PyProjectParseError, self).__init__(msg)
 
 
@@ -87,11 +87,11 @@ def parse_pyproject(file_path):
         return pyproject_parameters
 
     # Parse single string values
-    for parameter in (("max-average", "average"),
-                      ("max-modules", "modules"),
-                      ("max-absolute", "absolute"),
+    for parameter in (("max_average", "average"),
+                      ("max_modules", "modules"),
+                      ("max_absolute", "absolute"),
                       ("url", "url"),
-                      ("config-file", "config")):
+                      ("config_file", "config")):
         pyproject_parameters[parameter[1]] = configuration.getstr(
             PYPROJECT_SECTION, parameter[0], fallback=None)
 
@@ -109,31 +109,28 @@ def parse_pyproject(file_path):
 
     try:
         pyproject_parameters["averagenum"] = configuration.getfloat(
-            PYPROJECT_SECTION, "max-average-num", fallback=None)
+            PYPROJECT_SECTION, "max_average_num", fallback=None)
     except ValueError:
-        raise PyProjectParseError("Invalid format of parameter max-average-num")
+        raise PyProjectParseError("Invalid format of parameter max_average_num")
 
     try:
         pyproject_parameters["no_assert"] = configuration.getboolean(
-            PYPROJECT_SECTION, "no-assert", fallback=None)
+            PYPROJECT_SECTION, "no_assert", fallback=None)
     except ValueError:
-        raise PyProjectParseError("Invalid format of parameter no-assert")
+        raise PyProjectParseError("Invalid format of parameter no_assert")
 
     return pyproject_parameters
 
 
-def parse_args():
-    '''Parse arguments from the command line and read the config file (for the
-    REPO_TOKEN value).
-    '''
-    import yaml
+def get_parser():
+    '''Get parser.'''
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--version', action='version',
                         version=__version__)
-    parser.add_argument('path', help='Directory containing source files to '
-                        'analyze, or multiple file paths', nargs='+')
+    parser.add_argument('-p', '--path', help='Directory containing source files to '
+                        'analyze, or multiple file paths', nargs='+', default='*.py')
     parser.add_argument('-a', '--max-average', dest='average', metavar='<str>',
                         help='Letter grade threshold for the average complexity')
     parser.add_argument('--max-average-num', dest='averagenum', type=float,
@@ -159,13 +156,36 @@ def parse_args():
                         default='.xenon.yml', help='Xenon config file '
                         '(default: %(default)s)')
 
+    return parser
+
+
+def get_parser_without_set_defaults(parser):
+    '''Get parser without set default values.'''
+    import copy
+
+    parser = copy.deepcopy(parser)
+
+    for argumnet in parser._actions[1:]:
+        argumnet.default = None
+
+    return parser
+
+
+def parse_args(pyproject_file):
+    '''Parse arguments from the command line and read the config file (for the
+    REPO_TOKEN value).
+    '''
+    import yaml
+
+    parser = get_parser()
+
+    # Create copy of argparser without default
+    # To analyze if argument was pased from cmd or is set to default
+    parser_wo_defaults = get_parser_without_set_defaults(parser)
+
     args = parser.parse_args()
-    # normalize the rank
-    for attr in ('absolute', 'modules', 'average'):
-        val = getattr(args, attr, None)
-        if val is None:
-            continue
-        setattr(args, attr, val.upper())
+    args_passed = parser_wo_defaults.parse_args()
+
     try:
         with open(args.config, 'r') as f:
             yml = yaml.load(f)
@@ -177,12 +197,28 @@ def parse_args():
     args.service_name = yml.get('service_name', 'travis-ci')
     args.service_job_id = os.environ.get('TRAVIS_JOB_ID', '')
 
-    pyproject_args = parse_pyproject("pyproject.toml")
+    pyproject_args = parse_pyproject(pyproject_file)
 
+    # Parse priorities - first cmd, then pyproject.toml
     # Include args from pyproject.toml file
     for arg_name, arg_value in pyproject_args.items():
-        if arg_value:
-            setattr(args, arg_name, arg_value)
+        # Atgument not set in pyproject.toml
+        if not arg_value:
+            continue
+
+        # Argument set from cmd
+        if getattr(args, arg_name, None) and (getattr(args_passed, arg_name, None) is not None):
+            continue
+
+        # Set only in pyproject.toml
+        setattr(args, arg_name, arg_value)
+
+    # normalize the rank
+    for attr in ('absolute', 'modules', 'average'):
+        val = getattr(args, attr, None)
+        if val is None:
+            continue
+        setattr(args, attr, val.upper())
 
     return args
 
@@ -195,7 +231,7 @@ def main(args=None):
     from xenon.core import analyze
     from xenon.repository import gitrepo
 
-    args = args or parse_args()
+    args = args or parse_args("pyproject.toml")
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('xenon')
     if args.url and len(args.path) > 1:
