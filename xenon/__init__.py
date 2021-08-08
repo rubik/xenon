@@ -202,7 +202,7 @@ def parse_args(pyproject_file):
     # Parse priorities - first cmd, then pyproject.toml
     # Include args from pyproject.toml file
     for arg_name, arg_value in pyproject_args.items():
-        # Atgument not set in pyproject.toml
+        # Argument not set in pyproject.toml
         if not arg_value:
             continue
 

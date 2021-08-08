@@ -206,7 +206,7 @@ class TestCustomConfigParserGetStr(unittest.TestCase):
             '[tool.xenon]\n'
             'path = ["path_1", "path_2", "path_3"]\n'
             'max_average = "A"\n'
-            'max_average-num = 1.2\n')
+            'max_average_num = 1.2\n')
 
         self.assertEqual(
             configuration.getstr(xenon.PYPROJECT_SECTION, "maxaverage", "None"), "None")
