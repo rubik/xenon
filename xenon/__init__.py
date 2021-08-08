@@ -8,6 +8,7 @@ import os
 import sys
 import logging
 import json
+import argparse
 
 
 # Import ConfigParser based on python version
@@ -124,8 +125,6 @@ def parse_pyproject(file_path):
 
 def get_parser():
     '''Get parser.'''
-    import argparse
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--version', action='version',
                         version=__version__)
@@ -159,16 +158,16 @@ def get_parser():
     return parser
 
 
-def get_parser_without_set_defaults(parser):
-    '''Get parser without set default values.'''
-    import copy
+def get_parser_defaults_and_delete_defaults(parser):
+    '''Get defaults of parser and delete them in parser.'''
+    default_values = {}
 
-    parser = copy.deepcopy(parser)
+    for argument in parser._actions:
+        if argument.default is not None:
+            default_values[argument.dest] = argument.default
+            argument.default = None
 
-    for argumnet in parser._actions[1:]:
-        argumnet.default = None
-
-    return parser
+    return default_values
 
 
 def parse_args(pyproject_file):
@@ -177,14 +176,30 @@ def parse_args(pyproject_file):
     '''
     import yaml
 
+    args = argparse.Namespace()
+
     parser = get_parser()
+    args_default = get_parser_defaults_and_delete_defaults(parser)
+    args_cmd = parser.parse_args()
 
-    # Create copy of argparser without default
-    # To analyze if argument was pased from cmd or is set to default
-    parser_wo_defaults = get_parser_without_set_defaults(parser)
+    # Include default values
+    for arg_name, arg_value in args_default.items():
+        setattr(args, arg_name, arg_value)
 
-    args = parser.parse_args()
-    args_passed = parser_wo_defaults.parse_args()
+    # Include args from pyproject.toml file
+    pyproject_args = parse_pyproject(pyproject_file)
+    for arg_name, arg_value in pyproject_args.items():
+        # Argument not set in pyproject.toml
+        if not arg_value:
+            continue
+
+        # Set only in pyproject.toml
+        setattr(args, arg_name, arg_value)
+
+    # Include args from cmd
+    for arg_name, arg_value in vars(args_cmd).items():
+        if arg_value is not None:
+            setattr(args, arg_name, arg_value)
 
     try:
         with open(args.config, 'r') as f:
@@ -196,22 +211,6 @@ def parse_args(pyproject_file):
                               os.environ.get('BARIUM_REPO_TOKEN', ''))
     args.service_name = yml.get('service_name', 'travis-ci')
     args.service_job_id = os.environ.get('TRAVIS_JOB_ID', '')
-
-    pyproject_args = parse_pyproject(pyproject_file)
-
-    # Parse priorities - first cmd, then pyproject.toml
-    # Include args from pyproject.toml file
-    for arg_name, arg_value in pyproject_args.items():
-        # Argument not set in pyproject.toml
-        if not arg_value:
-            continue
-
-        # Argument set from cmd
-        if getattr(args, arg_name, None) and (getattr(args_passed, arg_name, None) is not None):
-            continue
-
-        # Set only in pyproject.toml
-        setattr(args, arg_name, arg_value)
 
     # normalize the rank
     for attr in ('absolute', 'modules', 'average'):

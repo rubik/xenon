@@ -408,23 +408,27 @@ class TestParsePyproject(unittest.TestCase):
                     "no_assert": True})
 
 
-class TestGetParserWithoutSetDefaults(unittest.TestCase):
-    '''Test class for function get_parser_without_set_defaults.'''
+class TestGetParserDefaultsAndDeleteDefaults(unittest.TestCase):
+    '''Test class for function get_parser_defaults_and_delete_defaults.'''
 
     def test_valid_case(self):
         '''Test valid case'''
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(add_help=False)
 
         parser.add_argument("-t", "--test", default="test")
-        parser.add_argument("-v", "--values", default="values")
+        parser.add_argument("-v", "--values", default="values", dest="val")
+        parser.add_argument("-w", "--without")
 
-        parser_without_defaults = xenon.get_parser_without_set_defaults(parser)
+        args_defualt = xenon.get_parser_defaults_and_delete_defaults(parser)
 
-        sys.argv = ["file,py"]
+        self.assertEqual(args_defualt, {"test": "test", "val": "values"})
 
-        for argument in ("test", "values"):
-            self.assertRaises(
-                AttributeError, getattr, parser_without_defaults, argument)
+        sys.argv = ["file.py"]
+
+        parser.parse_args()
+
+        self.assertEqual(
+            vars(parser.parse_args()), {"test": None, "val": None, "without": None})
 
 
 class TestParseArgs(unittest.TestCase):
@@ -452,6 +456,8 @@ class TestParseArgs(unittest.TestCase):
                 toml_file.write(
                     '[tool.xenon]\n'
                     'config_file = config_file_path\n')
+
+            sys.argv = ["file"]
 
             args = xenon.parse_args(pyproject_path)
             self.assertEqual(args.config, "config_file_path")
