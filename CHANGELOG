@@ -1,3 +1,9 @@
+0.9.0 (Feb 24, 2022)
+--------------------
+
+* Update pinned requirements to allow PyYAML v6
+* Monkey-patch test module to work around 'paramunittest' issues on Python 3.10
+
 0.8.0 (Sep 03, 2021)
 --------------------
 
