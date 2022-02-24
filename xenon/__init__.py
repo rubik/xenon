@@ -55,7 +55,7 @@ def parse_args():
         setattr(args, attr, val.upper())
     try:
         with open(args.config, 'r') as f:
-            yml = yaml.load(f)
+            yml = yaml.safe_load(f)
     except (getattr(__builtins__, 'FileNotFoundError', IOError),
             yaml.YAMLError):
         yml = {}
