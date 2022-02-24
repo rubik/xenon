@@ -1,8 +1,13 @@
 # coding=utf-8
 # import mock  # can't use mock because patches influences each other
 import os
+import sys
 import unittest
 import collections
+
+if sys.version_info[:2] >= (3, 10):
+    import collections.abc
+    collections.Mapping = collections.abc.Mapping
 
 import httpretty
 from paramunittest import parametrized
