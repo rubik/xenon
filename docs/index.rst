@@ -73,6 +73,10 @@ against the *exclude* patterns. Every directory name is matched against the
 *ignore* patterns.  If any of the patterns matches, Xenon won't even descend
 into them.
 
+You can also control a specific block to ignore within a file. Using the option
+``-g, --ignore-blocks``. It accepts a comma separated list of blocks to ignore.
+Block format is `module:block_name`.
+
 The actual threshold values are defined through these options:
 
 * ``-a, --max-average``: Threshold for the *average* complexity (across all the

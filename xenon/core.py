@@ -2,6 +2,8 @@
 :func:`~xenon.core.analyze` function should be used directly.
 '''
 
+from collections import defaultdict
+
 from radon.complexity import cc_rank, SCORE
 from radon.cli import Config
 from radon.cli.harvest import CCHarvester
@@ -34,6 +36,24 @@ def analyze(args, logger):
     return find_infractions(args, logger, results), results
 
 
+def build_blocks_to_ignore(args):
+    '''Build a dict from module name to a list of blocks in that module to ignore.
+
+    Read the data from args.ignore_blocks which is a list of blocks separated by ",".
+    The format of a block is "<module_name>:<block_name>".
+    '''
+    if not args.ignore_blocks:
+        return {}
+
+    blocks_to_ignore = defaultdict(list)
+
+    for block_to_ignore in args.ignore_blocks.split(','):
+        module_name, block_name = block_to_ignore.split(':')
+        blocks_to_ignore[module_name.strip()].append(block_name.strip())
+
+    return blocks_to_ignore
+
+
 def av(n, m):
     '''Compute n/m if ``m != 0`` or otherwise return 0.'''
     return n / m if m != 0 else 0
@@ -52,6 +72,7 @@ def find_infractions(args, logger, results):
 
     The number of infractions with respect to the threshold values is returned.
     '''
+    blocks_to_ignore = build_blocks_to_ignore(args)
     infractions = 0
     module_averages = []
     total_cc = 0.
@@ -64,7 +85,7 @@ def find_infractions(args, logger, results):
         for block in blocks:
             module_cc += block['complexity']
             r = cc_rank(block['complexity'])
-            if check(r, args.absolute):
+            if check(r, args.absolute) and block['name'] not in blocks_to_ignore.get(module, []):
                 logger.error('block "%s:%s %s" has a rank of %s', module,
                              block['lineno'], block['name'], r)
                 infractions += 1

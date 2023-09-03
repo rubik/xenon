@@ -36,6 +36,9 @@ def parse_args():
                         help='Comma separated list of patterns to ignore. If '
                         'they are directories, Xenon won\'t even descend into '
                         'them')
+    parser.add_argument('-g', '--ignore-blocks', metavar='<str>', dest='ignore_blocks',
+                        help='Comma separated list of blocks to ignore.' 
+                        'Block format is "module:block_name"')
     parser.add_argument('-u', '--url', metavar='<URL>', dest='url',
                         help='Where to send the JSON data through a POST '
                         'request.')
