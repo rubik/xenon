@@ -45,7 +45,7 @@ Or download the source and run the setup file (requires setuptools):
 
    $ python setup.py install
 
-Xenon is tested with all versions of Python from **2.7** to **3.6** as well as
+Xenon is tested with Python versions **2.7** and **3.6** to **3.9** as well as
 **PyPy**.
 
 Usage
