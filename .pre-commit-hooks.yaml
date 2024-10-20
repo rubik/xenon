@@ -4,4 +4,4 @@
   description: Monitoring tool based on Radon
   entry: xenon
   language: python
-  types: [text]
+  types: [python]
