@@ -45,8 +45,8 @@ def parse_args():
     parser.add_argument('-c', '--config-file', metavar='<path>', dest='config',
                         default='.xenon.yml', help='Xenon config file '
                         '(default: %(default)s)')
-    parser.add_argument('-l', '--links', dest='links', action='store_true',
-                        help='Print output starting with the file path')
+    parser.add_argument('--paths-in-front', dest='paths_in_front', action='store_true',
+                        help='Print block and module complexity with log line starting with their path')
 
     args = parser.parse_args()
     # normalize the rank
@@ -77,7 +77,7 @@ def main(args=None):
     from xenon.repository import gitrepo
 
     args = args or parse_args()
-    if args.links:
+    if args.paths_in_front:
         # Skip the level and module name to have log line starting with message
         # When using xenon in PyCharm terminal, one can benefit from
         # PyCharm changing path to the violation location into the active link
