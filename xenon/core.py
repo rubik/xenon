@@ -65,8 +65,12 @@ def find_infractions(args, logger, results):
             module_cc += block['complexity']
             r = cc_rank(block['complexity'])
             if check(r, args.absolute):
-                logger.error('block "%s:%s %s" has a rank of %s', module,
-                             block['lineno'], block['name'], r)
+                if args.paths_in_front:
+                    logger.error('%s:%s "%s" block has a rank of %s', module,
+                            block['lineno'], block['name'], r)
+                else:
+                    logger.error('block "%s:%s %s" has a rank of %s', module,
+                            block['lineno'], block['name'], r)
                 infractions += 1
         module_averages.append((module, av(module_cc, len(blocks))))
         total_cc += module_cc
@@ -85,6 +89,9 @@ def find_infractions(args, logger, results):
     for module, ma in module_averages:
         mar = cc_rank(ma)
         if check(mar, args.modules):
-            logger.error('module %r has a rank of %s', module, mar)
+            if args.paths_in_front:
+                logger.error('%r module has a rank of %s', module, mar)
+            else:
+                logger.error('module %r has a rank of %s', module, mar)
             infractions += 1
     return infractions

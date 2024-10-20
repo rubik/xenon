@@ -21,7 +21,9 @@ import xenon
 from xenon import core, api, main
 
 
-Args = collections.namedtuple('Args', 'absolute average modules averagenum')
+Args = collections.namedtuple(
+    'Args', 'absolute average modules averagenum paths_in_front'
+)
 
 
 class CatchAll(object):
@@ -44,6 +46,7 @@ class Arguments(object):
     absolute = None
     modules = None
     averagenum = None
+    paths_in_front = False
 
 
 @parametrized(
@@ -87,42 +90,42 @@ class CheckTestCase(unittest.TestCase):
     # infractions
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'B', 'B', None),
+        ('C', 'B', 'B', None, False),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('B', 'B', 'B', None),
+        ('B', 'B', 'B', None, False),
         1
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'A', 'B', None),
+        ('C', 'A', 'B', None, True),
         1
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'B', 'A', None),
+        ('C', 'B', 'A', None, False),
         1
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        (None, 'B', 'B', None),
+        (None, 'B', 'B', None, True),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', None, 'B', None),
+        ('C', None, 'B', None, False),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        ('C', 'B', None, None),
+        ('C', 'B', None, None, True),
         0
     ),
     (
         {'mod.py': [4, 12, 8, 9], 'mod2.py': [3, 3, 2, 10]},
-        (None, None, None, 0),
+        (None, None, None, 0, True),
         1
     ),
 )
