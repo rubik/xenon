@@ -104,6 +104,24 @@ following conditions is met:
 * The average complexity (among all of the analyzed blocks) is ranked with
   ``B`` or higher.
 
+Pre-commit hook
++++++++++++++++
+
+Xenon can be used in combination with `pre-commit <https://pre-commit.com/>`_ as follows:
+
+.. code-block:: yaml
+
+    # monitor code complexity
+    - repo: https://github.com/rubik/xenon
+      rev: v0.9.0
+      hooks:
+      - id: xenon
+        args: ['--max-absolute=B', '--max-modules=B', '--max-average=A']
+
+Note: due to how options are passed to commands by pre-commit, make sure to
+pass values either with an equals sign like in the above example, or by
+splitting them as separate list items, e.g. ``['--max-absolute', 'B']``.
+
 Other resources
 ---------------
 
