@@ -9,6 +9,7 @@ import tempfile
 import sys
 import argparse
 
+# Monkey-patch paramunittest for Python 3.10+
 if sys.version_info[:2] >= (3, 10):
     import collections.abc
     collections.Mapping = collections.abc.Mapping
