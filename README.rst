@@ -1,10 +1,6 @@
 xenon
 =====
 
-.. image:: https://img.shields.io/travis/rubik/xenon/master.svg
-    :alt: Travis-CI badge
-    :target: https://travis-ci.org/rubik/xenon
-
 .. image:: https://img.shields.io/coveralls/rubik/xenon/master.svg
     :alt: Coveralls badge
     :target: https://coveralls.io/r/rubik/xenon?branch=master
