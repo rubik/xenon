@@ -7,20 +7,129 @@ __version__ = '0.9.1'
 import os
 import sys
 import logging
+import json
+import argparse
 
 
-def parse_args():
-    '''Parse arguments from the command line and read the config file (for the
-    REPO_TOKEN value).
-    '''
-    import yaml
-    import argparse
+# Import ConfigParser based on python version
+if sys.version_info[0] == 2:
+    import ConfigParser as configparser
+else:
+    import configparser
 
+PYPROJECT_SECTION = "tool.xenon"
+
+
+class PyProjectParseError(Exception):
+    '''Exception for pyproject.toml parser.'''
+    def __init__(self, msg):
+        super(PyProjectParseError, self).__init__(msg)
+
+
+class CustomConfigParser(configparser.ConfigParser):
+    '''Custom ConfigParser.'''
+
+    def getstr(self, section, option, fallback=object()):
+        '''Get required option which is strings'''
+        values = self.get(section, option, fallback=fallback)
+        if values == fallback:
+            return fallback
+
+        # Trim " or '
+        if (values[0] == '"' and values[-1] == '"') or (values[0] == '\'' and values[-1] == '\''):
+            return values[1:-1]
+
+        return values
+
+    def getliststr(self, section, option, fallback=object()):
+        '''Get required option which is list of strings.'''
+        values = self.get(section, option, fallback=fallback)
+        if values == fallback:
+            return fallback
+
+        # Conver string to python object
+        try:
+            values = json.loads(values)
+        except json.decoder.JSONDecodeError:
+            raise PyProjectParseError("Invalid format of parameter %s" % option)
+
+        # Single parameter
+        if isinstance(values, str):
+            return [values]
+
+        # Check format - list
+        if not isinstance(values, list):
+            raise PyProjectParseError("Invalid format of parameter %s" % option)
+
+        # Check items
+        for value in values:
+            if not isinstance(value, str):
+                raise PyProjectParseError("Invalid format of parameter %s" % option)
+
+        return values
+
+
+def parse_pyproject(file_path):
+    '''Parse pyproject.toml file.'''
+    pyproject_parameters = {}
+
+    configuration = CustomConfigParser()
+
+    # Invalid format - missing any section []
+    try:
+        loaded_files = configuration.read(file_path)
+    except configparser.MissingSectionHeaderError:
+        raise PyProjectParseError("Unable to parse %s" %file_path)
+    except configparser.DuplicateOptionError:
+        raise PyProjectParseError("%s contain duplicate parameters" %file_path)
+
+    # Pyproject.toml does not exists
+    if not loaded_files:
+        return pyproject_parameters
+
+    # Parse single string values
+    for parameter in (("max_average", "average"),
+                      ("max_modules", "modules"),
+                      ("max_absolute", "absolute"),
+                      ("url", "url"),
+                      ("config_file", "config")):
+        pyproject_parameters[parameter[1]] = configuration.getstr(
+            PYPROJECT_SECTION, parameter[0], fallback=None)
+
+    # Parse list of string to str
+    for parameter in (("exclude", "exclude"), ("ignore", "ignore")):
+        values = configuration.getliststr(PYPROJECT_SECTION, parameter[0], None)
+        if values:
+            pyproject_parameters[parameter[1]] = ",".join(values)
+        else:
+            pyproject_parameters[parameter[1]] = None
+
+    # Parse list of string as list
+    pyproject_parameters["path"] = configuration.getliststr(
+        PYPROJECT_SECTION, "path", fallback=None)
+
+    try:
+        pyproject_parameters["averagenum"] = configuration.getfloat(
+            PYPROJECT_SECTION, "max_average_num", fallback=None)
+    except ValueError:
+        raise PyProjectParseError("Invalid format of parameter max_average_num")
+
+    try:
+        pyproject_parameters["no_assert"] = configuration.getboolean(
+            PYPROJECT_SECTION, "no_assert", fallback=None)
+    except ValueError:
+        raise PyProjectParseError("Invalid format of parameter no_assert")
+
+    return pyproject_parameters
+
+
+def get_parser():
+    '''Get parser.'''
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--version', action='version',
                         version=__version__)
-    parser.add_argument('path', help='Directory containing source files to '
-                        'analyze, or multiple file paths', nargs='+')
+    parser.add_argument('-p', '--path', help='Directory containing source files to '
+                        'analyze, or multiple file paths', nargs='+', default='*.py')
     parser.add_argument('-a', '--max-average', dest='average', metavar='<str>',
                         help='Letter grade threshold for the average complexity')
     parser.add_argument('--max-average-num', dest='averagenum', type=float,
@@ -46,13 +155,52 @@ def parse_args():
                         default='.xenon.yml', help='Xenon config file '
                         '(default: %(default)s)')
 
-    args = parser.parse_args()
-    # normalize the rank
-    for attr in ('absolute', 'modules', 'average'):
-        val = getattr(args, attr, None)
-        if val is None:
+    return parser
+
+
+def get_parser_defaults_and_delete_defaults(parser):
+    '''Get defaults of parser and delete them in parser.'''
+    default_values = {}
+
+    for argument in parser._actions:
+        if argument.default is not None:
+            default_values[argument.dest] = argument.default
+            argument.default = None
+
+    return default_values
+
+
+def parse_args(pyproject_file):
+    '''Parse arguments from the command line and read the config file (for the
+    REPO_TOKEN value).
+    '''
+    import yaml
+
+    args = argparse.Namespace()
+
+    parser = get_parser()
+    args_default = get_parser_defaults_and_delete_defaults(parser)
+    args_cmd = parser.parse_args()
+
+    # Include default values
+    for arg_name, arg_value in args_default.items():
+        setattr(args, arg_name, arg_value)
+
+    # Include args from pyproject.toml file
+    pyproject_args = parse_pyproject(pyproject_file)
+    for arg_name, arg_value in pyproject_args.items():
+        # Argument not set in pyproject.toml
+        if not arg_value:
             continue
-        setattr(args, attr, val.upper())
+
+        # Set only in pyproject.toml
+        setattr(args, arg_name, arg_value)
+
+    # Include args from cmd
+    for arg_name, arg_value in vars(args_cmd).items():
+        if arg_value is not None:
+            setattr(args, arg_name, arg_value)
+
     try:
         with open(args.config, 'r') as f:
             yml = yaml.safe_load(f)
@@ -63,6 +211,14 @@ def parse_args():
                               os.environ.get('BARIUM_REPO_TOKEN', ''))
     args.service_name = yml.get('service_name', 'travis-ci')
     args.service_job_id = os.environ.get('TRAVIS_JOB_ID', '')
+
+    # normalize the rank
+    for attr in ('absolute', 'modules', 'average'):
+        val = getattr(args, attr, None)
+        if val is None:
+            continue
+        setattr(args, attr, val.upper())
+
     return args
 
 
@@ -74,7 +230,7 @@ def main(args=None):
     from xenon.core import analyze
     from xenon.repository import gitrepo
 
-    args = args or parse_args()
+    args = args or parse_args("pyproject.toml")
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('xenon')
     if args.url and len(args.path) > 1:
