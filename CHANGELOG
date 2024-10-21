@@ -1,3 +1,8 @@
+0.9.3 (Oct 21, 2024)
+--------------------
+
+* Revert #41, "Add support for pyproject.toml configuration" due to pyproject.toml parsing issues.
+
 0.9.2 (Oct 20, 2024)
 --------------------
 
